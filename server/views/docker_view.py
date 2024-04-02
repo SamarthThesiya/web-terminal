@@ -14,11 +14,16 @@ class Docker(Resource):
 
     @staticmethod
     def post():
-        client = docker.APIClient(base_url="tcp://web-terminal-docker:2375", tls=True)
+        tls_config = docker.tls.TLSConfig(
+            client_cert=('/certs/client/cert.pem', '/certs/client/key.pem'),
+            ca_cert='/certs/client/ca.pem',
+            verify=True
+        )
+        client = docker.DockerClient(base_url="tcp://docker:2376", tls=tls_config)
         container = client.containers.run(
             "ghcr.io/cedana/cedana:latest",
             command="/bin/sh",
-            tty=False,
+            tty=True,
             auto_remove=True,
             detach=True,
             stderr=True,

@@ -1,0 +1,15 @@
+#!/sbin/openrc-run
+
+name="Socat Forwarder"
+description="Forwards TCP port"
+
+command="/usr/bin/socat"
+command_args="TCP-LISTEN:7000,reuseaddr,fork unix:///var/run/docker.sock"
+command_background="yes"
+
+pidfile="/var/run/${RC_SVCNAME}.pid"
+start_stop_daemon_args="--make-pidfile"
+
+depend() {
+    need net
+}

@@ -1,5 +1,22 @@
 FROM docker:20.10-dind
 
-RUN apk add socat
+#FROM docker:18.09-dind
+#
+RUN apk update && \
+    apk add socat openrc
 
-#ENTRYPOINT ["socat", "TCP-LISTEN:2375,reuseaddr,fork", "unix:///var/run/docker.sock"]
+#RUN socat TCP-LISTEN:7000,reuseaddr,fork unix:///var/run/docker.sock &
+#
+#COPY docker/services/socat_forward /etc/init.d/socat_forward
+#
+#RUN chmod +x /etc/init.d/socat_forward
+#
+#RUN rc-update add socat_forward default
+
+#RUN socat TCP-LISTEN:7000,reuseaddr,fork unix:///var/run/docker.sock
+
+# RUN apk add docker-openrc
+#    rc-service docker start
+#
+#RUN chmod 777 /usr/local/bin/docker
+#ENTRYPOINT ["socat TCP-LISTEN:8000,reuseaddr,fork unix:///var/run/docker.sock"]

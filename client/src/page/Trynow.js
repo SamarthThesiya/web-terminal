@@ -26,7 +26,7 @@ function Trynow() {
         maximizeWin: true,
         cols: 128,
     });
-    const socket = new WebSocket("ws://localhost:2376/containers/"+ containerId +"/attach/ws?stdin=1&stdout=1&stream=1");
+    const socket = new WebSocket("ws://localhost:7000/containers/"+ containerId +"/attach/ws?stream=1&stdout=1&stdin=1&logs=1");
     const attachAddon = new AttachAddon(socket);
     const fitAddon = new FitAddon();
     term.loadAddon(fitAddon);
