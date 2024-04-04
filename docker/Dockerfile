@@ -19,4 +19,4 @@ RUN apk update && \
 #    rc-service docker start
 #
 #RUN chmod 777 /usr/local/bin/docker
-#ENTRYPOINT ["socat TCP-LISTEN:8000,reuseaddr,fork unix:///var/run/docker.sock"]
+#ENTRYPOINT ["socat TCP-LISTEN:7000,reuseaddr,fork unix:///var/run/docker.sock"]

@@ -22,7 +22,9 @@ class Docker(Resource):
         client = docker.DockerClient(base_url="tcp://docker:2376", tls=tls_config)
         container = client.containers.run(
             "ghcr.io/cedana/cedana:latest",
-            command="/bin/sh",
+            # "ubuntu",
+            entrypoint="timeout",
+            command="-s SIGKILL 120 /bin/bash",
             tty=True,
             auto_remove=True,
             detach=True,
@@ -30,6 +32,8 @@ class Docker(Resource):
             stdin_open=True,
             stdout=False
         )
+
+        # container.stop()
 
         return {"success": True, "id": container.id}, 201
 

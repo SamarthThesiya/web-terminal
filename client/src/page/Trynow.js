@@ -13,7 +13,36 @@ import './Trynow.css';
 import {io} from "socket.io-client";
 
 function Trynow() {
-    const location = useLocation()
+    const location = useLocation();
+    const [showTerminal, setShowTerminal] = useState(false);
+    const [terminalPlaceholder, setTerminalPlaceholder] = useState("Terminal is loading");
+    // const [timer, setTimer] = useState(120);
+
+    //  let timerId = setInterval(function () {
+    //
+    //     console.log(1);
+    //
+    //     // // If the countdown timer has expired, stop the timer
+    //     // if (timer === 0) {
+    //     //     clearInterval(timerId);
+    //     // }
+    //     //
+    //     // setTimer(timer-1);
+    //
+    // }, 1000);
+
+    const [count, setCount] = useState(120);
+
+    useEffect(() => {
+        // If count is 0, do not set another timeout to stop the countdown
+        if (count === 0) return;
+
+        // Set a timeout to decrement the count every second
+        const timerId = setTimeout(() => setCount(count - 1), 1000);
+
+        // Clear the timeout if the component unmounts to prevent memory leaks
+        return () => clearTimeout(timerId);
+    }, [count]);
 
     const query = new URLSearchParams(location.search);
     const containerId = query.get("id");
@@ -48,13 +77,30 @@ function Trynow() {
         window.onresize = function () {
             fitAddon.fit();
         }
+
+        setShowTerminal(true);
+    }
+
+    function closeTerminal () {
+        setTerminalPlaceholder("Terminal is terminated");
+        setShowTerminal(false);
+    }
+
+    // socket.onclose = function () {
+    //     closeTerminal();
+    // }
+
+    socket.onerror = function () {
+        closeTerminal();
     }
 
     useEffect(() => {
 
-        term.open(document.getElementById("xterm"));
+        if (showTerminal === true) {
+            term.open(document.getElementById("xterm"));
+        }
 
-    }, [])
+    }, [showTerminal])
 
     function stopContainer(event) {
 
@@ -69,10 +115,26 @@ function Trynow() {
 
     }
 
+    // let timerId = setInterval(function () {
+    //
+    //     console.log(1);
+    //
+    //     // // If the countdown timer has expired, stop the timer
+    //     // if (timer === 0) {
+    //     //     clearInterval(timerId);
+    //     // }
+    //     //
+    //     // setTimer(timer-1);
+    //
+    // }, 1000);
+
     return (
         <>
-            <div id="xterm"></div>
-            <button onClick={stopContainer}>Stop Container</button>
+            {showTerminal ?
+                <div id="xterm"></div> :
+                <div>{terminalPlaceholder}</div>
+            }
+            <div>Remaining time: {count}</div>
         </>
     )
 }
