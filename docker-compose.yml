@@ -29,7 +29,6 @@ services:
     command: "npm start"
 
   docker:
-#    image: docker:20.10-dind
     build:
       dockerfile: docker/Dockerfile
       context: .
