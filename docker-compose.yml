@@ -11,8 +11,9 @@ services:
       - ./server:/app
       - ./server/entrypoint.sh:/entrypoint.sh
       - ./docker/certs:/certs
+      - ~/.kube/config:/.kube/config
     ports:
-      - 5000:5000
+      - 5001:5000
     privileged: true
     entrypoint: /entrypoint.sh
     depends_on:
@@ -40,14 +41,3 @@ services:
       - 7000:7000
     volumes:
       - ./docker/certs:/certs
-#      - /temp/docker.sock:/var/run/docker.sock
-#    command: "socat TCP-LISTEN:7000,reuseaddr,fork unix:///var/run/docker.sock &"
-
-#  socat_rdp_tcp:
-#    image: alpine/socat
-#    container_name: socat_rdp_tcp
-#    command: "TCP-LISTEN:7000,reuseaddr,fork unix:///var/run/docker.sock"
-#    volumes:
-#      - /temp/docker.sock:/var/run/docker.sock:ro
-#    ports:
-#      - 7000:7000

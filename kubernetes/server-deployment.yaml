@@ -1,0 +1,48 @@
+# server-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-terminal-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: web-terminal-backend
+  template:
+    metadata:
+      labels:
+        app: web-terminal-backend
+    spec:
+      containers:
+      - name: server
+        image: web-terminal-backend:latest
+        imagePullPolicy: Never
+#        env:
+#        - name: DOCKER_TLS_VERIFY
+#          value: "1"
+#        - name: DOCKER_CERT_PATH
+#          value: "/certs/client"
+#        volumeMounts:
+#        - name: app-code
+#          mountPath: /app
+#        - name: entrypoint-script
+#          mountPath: /entrypoint.sh
+#          subPath: entrypoint.sh
+#        - name: certs
+#          mountPath: /certs
+        ports:
+        - containerPort: 5000
+#        securityContext:
+#          privileged: true
+#        command: ["/entrypoint.sh"]
+#      volumes:
+#      - name: app-code
+#        hostPath:
+#          path: ./../server
+#      - name: entrypoint-script
+#        hostPath:
+#          path: ./../server/entrypoint.sh
+#      - name: certs
+#        hostPath:
+#          path: ./../docker/certs
+

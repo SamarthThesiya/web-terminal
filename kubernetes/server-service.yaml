@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: web-terminal-backend
+spec:
+  selector:
+    app: web-terminal-backend
+  type: LoadBalancer
+  ports:
+  - port: 5000
+    targetPort: 5000

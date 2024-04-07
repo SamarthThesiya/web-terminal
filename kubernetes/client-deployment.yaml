@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-terminal-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: web-terminal-frontend
+  template:
+    metadata:
+      labels:
+        app: web-terminal-frontend
+    spec:
+      containers:
+      - name: client
+        image: web-terminal-frontend:latest
+        imagePullPolicy: Never
+#        volumeMounts:
+#        - name: app-code
+#          mountPath: /app
+#        workingDir: /app
+#        command: ["npm", "start"]
+        ports:
+        - containerPort: 3000
+#      volumes:
+#      - name: app-code
+#        hostPath:
+#          path: /mnt/c/Data/Projects/web-terminal/client
