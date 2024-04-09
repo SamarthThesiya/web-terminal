@@ -26,6 +26,9 @@ spec:
           mountPath: /var/run
         securityContext:
           privileged: true
+        stdinOnce: false
+        command:
+          - bash
       - name: docker-socket-proxy
         image: alpine/socat
         command:

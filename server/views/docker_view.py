@@ -41,11 +41,17 @@ class Docker(Resource):
         pod_manifest = {
             "apiVersion": "v1",
             "kind": "Pod",
-            "metadata": {"name": "cedana-pod"},
+            "metadata": {"name": "cedana-pod2"},
             "spec": {
                 "containers": [{
-                    "name": "cedana-pod",
-                    "image": "ghcr.io/cedana/cedana:latestp"
+                    "name": "cedana-pod2",
+                    "image": "ghcr.io/cedana/cedana:latest",
+                    "command": ["/bin/sh"],
+                    "tty": True,
+                    "stdin": True,
+                    "securityContext": {
+                        ""
+                    }
                 }]
             }
         }
