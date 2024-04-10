@@ -16,5 +16,5 @@ spec:
             - /bin/bash
             - -c
             - |
-              kubectl get pods -o=jsonpath='{.items[?(@.metadata.creationTimestamp<=now-10s)].metadata.name}' | xargs kubectl delete pod
+              kubectl get pod -o json | jq -r --argjson timestamp 60 '.items[] | select (.metadata.creationTimestamp | fromdate < now - $timestamp).metadata.name' | xargs -r -L1 kubectl delete pod
           restartPolicy: OnFailure

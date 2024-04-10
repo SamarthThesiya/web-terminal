@@ -157,7 +157,9 @@ function Trynownew() {
     const [timediff, setTimeDiff] = useState(0);
     const [containerCreationTime, setContainerCreationTime] = useState(0);
     const [currentCounts, setCurrentCounts] = useState(0);
-    const allowedSec = 30;
+    const [maxCounts, setMaxCounts] = useState(0);
+    const [terminalPlaceholder, setTerminalPlaceholder] = useState("Terminal loading...");
+    const allowedSec = 60;
 
     const xterm = (xtermRef.current = new Terminal({
         screenKeys: true,
@@ -173,19 +175,39 @@ function Trynownew() {
 
     useEffect(() => {
         // If count is 0, do not set another timeout to stop the countdown
-        if (containerCreationTime === 0 || allowedSec - timediff <= 0) return;
+        if (containerCreationTime === 0) return;
 
         let a = moment(containerCreationTime);
         let c = moment(moment.utc().format('YYYY-MM-DDTHH:mm:ss'));
 
         // Set a timeout to decrement the count every second
-        const timerId = setTimeout(() => setTimeDiff((c - a) / 1000), 1000);
+        const timerId = setTimeout(() => {
+          setTimeDiff((c - a) / 1000);
+
+          updateCurrentCount();
+        },1000);
 
         // Clear the timeout if the component unmounts to prevent memory leaks
         return () => clearTimeout(timerId);
     }, [timediff, containerCreationTime]);
 
+    function updateCurrentCount() {
+
+        axios({
+            url: BASE_URL + "/docker",
+            method: "GET",
+        }).then((res) => {
+            console.log(res);
+            setCurrentCounts(res.data.current_count);
+            setMaxCounts(res.data.max_count);
+        }).catch((err) => {
+            console.log(err);
+        })
+    }
+
     useEffect(() => {
+
+        divRef.current.style.display = 'none';
 
         axios({
             url: BASE_URL + "/docker/" + podId,
@@ -193,16 +215,6 @@ function Trynownew() {
         }).then((res) => {
             console.log(res);
             setContainerCreationTime(res.data.success.created_at);
-        }).catch((err) => {
-            console.log(err);
-        })
-
-        axios({
-            url: BASE_URL + "/docker",
-            method: "GET",
-        }).then((res) => {
-            console.log(res);
-            setCurrentCounts(res.data.success);
         }).catch((err) => {
             console.log(err);
         })
@@ -267,8 +279,16 @@ function Trynownew() {
                 window.onresize = function () {
                     fitAddon.fit();
                 }
+
+                divRef.current.style.display = 'block';
+                setTerminalPlaceholder("");
                 xterm.open(divRef.current);
 
+            })
+
+            socket.on("terminal_kill", (date) => {
+                divRef.current.style.display = 'none';
+                setTerminalPlaceholder("Terminal terminated!");
             })
         }
     }, [socket]);
@@ -288,8 +308,15 @@ function Trynownew() {
         <>
 
             <div ref={divRef}/>
-            <div>Remaining time: {convertSecondsToMinutesAndSeconds(allowedSec - timediff)}</div>
+            <div>{terminalPlaceholder}</div>
+            {
+                timediff <= allowedSec ?
+                <div>Remaining time: {convertSecondsToMinutesAndSeconds(allowedSec - timediff)}</div> :
+                <div>Container will be terminated within a minute</div>
+            }
+
             <div>Current active sessions: {currentCounts}</div>
+            <div>Max sessions: {maxCounts}</div>
         </>
     );
 }

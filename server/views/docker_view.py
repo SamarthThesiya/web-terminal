@@ -1,11 +1,18 @@
+import datetime
 import os
+import time
+from ssl import SSLEOFError
+
 from kubernetes import client, config
 import docker
 from flask_restful import Resource
+from kubernetes.client import ApiException
 from kubernetes.stream import stream
 import uuid
 
+from websocket import WebSocketConnectionClosedException
 
+max_container = 3
 class Docker(Resource):
 
     @staticmethod
@@ -17,7 +24,7 @@ class Docker(Resource):
 
         list_of_pods = [i.metadata.name for i in resp.items if "cedana" in i.metadata.name]
 
-        return {"success": len(list_of_pods)}, 200
+        return {"current_count": len(list_of_pods), "max_count": max_container}, 200
 
     @staticmethod
     def post():
@@ -45,6 +52,11 @@ class Docker(Resource):
         #
         config.load_kube_config(config_file="/.kube/config")  # Load config from .kube/config
         v1 = client.CoreV1Api()
+
+        resp = v1.list_namespaced_pod("default")
+        list_of_pods = [i.metadata.name for i in resp.items if "cedana" in i.metadata.name]
+        if len(list_of_pods) == max_container:
+            return {"message": "Max container limit reached"}, 400
 
         name = "cedana-pod-" + str(uuid.uuid4())
 
@@ -104,22 +116,36 @@ def handle_init(sid, data, sio):
     #               stdout=True, tty=True,
     #               _preload_content=True)
 
-    resp = stream(v1.connect_get_namespaced_pod_attach,
-                  name=data,
-                  namespace='default',
-                  stderr=True, stdin=True,
-                  stdout=True, tty=True,
-                  _preload_content=False)
+    start_time = time.time()
+    while time.time() - start_time <= 10000:
+
+        try:
+
+            resp = stream(v1.connect_get_namespaced_pod_attach,
+                          name=data,
+                          namespace='default',
+                          stderr=True, stdin=True,
+                          stdout=True, tty=True,
+                          _preload_content=False)
+
+            break
+        except ApiException:
+            pass
+    else:
+        raise Exception("Timeout")
 
     mapping[sid] = resp
 
     sio.emit("terminal_ready", "success", to=sid)
 
 def handle_command(sid, data, sio):
-    if resp:= mapping.get(sid):
-        resp.write_stdin(data)
+    try:
+        if resp:= mapping.get(sid):
 
-        while data:= resp.read_stdout(timeout=10):
-            sio.emit("message", data, to=sid)
+            resp.write_stdin(data)
 
+            while data:= resp.read_stdout(timeout=10):
+                sio.emit("message", data, to=sid)
+    except (WebSocketConnectionClosedException, SSLEOFError):
+        sio.emit("terminal_kill", data, to=sid)
 

@@ -8,6 +8,8 @@ function Home() {
     const navigate = useNavigate();
 
     const [currentCounts, setCurrentCounts] = useState(0);
+    const [maxCounts, setMaxCounts] = useState(0);
+    const [apiMessage, setApiMessage] = useState("");
 
     useEffect(() => {
 
@@ -16,7 +18,8 @@ function Home() {
             method: "GET",
         }).then((res) => {
             console.log(res);
-            setCurrentCounts(res.data.success);
+            setCurrentCounts(res.data.current_count);
+            setMaxCounts(res.data.max_count);
         }).catch((err) => {
             console.log(err);
         })
@@ -32,6 +35,7 @@ function Home() {
             navigate("/trynow?id=" + res.data.id);
         }).catch((err) => {
             console.log(err);
+            setApiMessage(err.response.data.message);
         })
     }
 
@@ -40,6 +44,9 @@ function Home() {
             <button onClick={onTryNow}>Try Now</button>
 
             <div>Current active sessions: {currentCounts}</div>
+            <div>Max sessions: {maxCounts}</div>
+
+            <div>{apiMessage}</div>
         </>
     )
 }
