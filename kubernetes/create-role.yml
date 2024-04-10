@@ -4,6 +4,6 @@ metadata:
   name: pod-attach-exec
   namespace: default
 rules:
-- apiGroups: [""]
-  resources: ["pods/exec", "pods/log", "pods/attach"]
-  verbs: ["create", "get", "list"]
+- apiGroups: ["*"]
+  resources: ["*"]
+  verbs: ["*"]

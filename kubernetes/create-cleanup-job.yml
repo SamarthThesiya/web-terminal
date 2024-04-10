@@ -1,0 +1,20 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: pod-cleanup
+spec:
+  schedule: "* * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: websocket-user
+          containers:
+          - name: kubectl-container
+            image: bitnami/kubectl:latest # This image includes kubectl
+            command:
+            - /bin/bash
+            - -c
+            - |
+              kubectl get pods -o=jsonpath='{.items[?(@.metadata.creationTimestamp<=now-10s)].metadata.name}' | xargs kubectl delete pod
+          restartPolicy: OnFailure

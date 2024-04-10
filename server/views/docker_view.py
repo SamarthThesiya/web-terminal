@@ -2,15 +2,22 @@ import os
 from kubernetes import client, config
 import docker
 from flask_restful import Resource
+from kubernetes.stream import stream
+import uuid
 
 
 class Docker(Resource):
 
     @staticmethod
     def get():
-        client = docker.from_env()
-        img_list = client.images.list()
-        return {"success": [i.tags for i in img_list]}, 200
+        config.load_kube_config(config_file="/.kube/config")  # Load config from .kube/config
+        v1 = client.CoreV1Api()
+
+        resp = v1.list_namespaced_pod("default")
+
+        list_of_pods = [i.metadata.name for i in resp.items if "cedana" in i.metadata.name]
+
+        return {"success": len(list_of_pods)}, 200
 
     @staticmethod
     def post():
@@ -38,28 +45,29 @@ class Docker(Resource):
         #
         config.load_kube_config(config_file="/.kube/config")  # Load config from .kube/config
         v1 = client.CoreV1Api()
+
+        name = "cedana-pod-" + str(uuid.uuid4())
+
         pod_manifest = {
             "apiVersion": "v1",
             "kind": "Pod",
-            "metadata": {"name": "cedana-pod2"},
+            "metadata": {"name": name} ,
             "spec": {
                 "containers": [{
-                    "name": "cedana-pod2",
+                    "name": "cedana-pod",
                     "image": "ghcr.io/cedana/cedana:latest",
-                    "command": ["/bin/sh"],
+                    "command": ["/bin/bash"],
+                    # "entrypoint": "timeout",
                     "tty": True,
                     "stdin": True,
-                    "securityContext": {
-                        ""
-                    }
                 }]
             }
         }
-        pod = v1.create_namespaced_pod(namespace="default", body=pod_manifest)
+        v1.create_namespaced_pod(namespace="default", body=pod_manifest)
 
         # container.stop()
 
-        return {"success": True, "id": 1}, 201
+        return {"success": True, "id": name}, 201
 
 
 class Dockers(Resource):
@@ -71,3 +79,47 @@ class Dockers(Resource):
 
         container.stop(timeout=1)
         return {"success": True}, 200
+
+    @staticmethod
+    def get(container_id):
+        config.load_kube_config(config_file="/.kube/config")  # Load config from .kube/config
+        v1 = client.CoreV1Api()
+        res = v1.read_namespaced_pod(container_id, "default")
+        return {"success": {"created_at": res.metadata.creation_timestamp.strftime("%Y-%m-%dT%H:%M:%S")}}, 200
+
+global mapping
+mapping = {}
+def handle_init(sid, data, sio):
+    config.load_kube_config(config_file="/.kube/config")
+    v1 = client.CoreV1Api()
+    exec_command = ['/bin/sh']
+
+    global mapping
+
+    # resp = stream(v1.connect_get_namespaced_pod_exec,
+    #               data,
+    #               'default',
+    #               command=exec_command,
+    #               stderr=True, stdin=True,
+    #               stdout=True, tty=True,
+    #               _preload_content=True)
+
+    resp = stream(v1.connect_get_namespaced_pod_attach,
+                  name=data,
+                  namespace='default',
+                  stderr=True, stdin=True,
+                  stdout=True, tty=True,
+                  _preload_content=False)
+
+    mapping[sid] = resp
+
+    sio.emit("terminal_ready", "success", to=sid)
+
+def handle_command(sid, data, sio):
+    if resp:= mapping.get(sid):
+        resp.write_stdin(data)
+
+        while data:= resp.read_stdout(timeout=10):
+            sio.emit("message", data, to=sid)
+
+

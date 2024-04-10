@@ -55,7 +55,10 @@ function Trynow() {
         maximizeWin: true,
         cols: 128,
     });
-    const socket = new WebSocket("ws://localhost:7000/containers/"+ containerId +"/attach/ws?stream=1&stdout=1&stdin=1&logs=1");
+    // const socket = new WebSocket("ws://localhost:7000/containers/"+ containerId +"/attach/ws?stream=1&stdout=1&stdin=1&logs=1");
+    const socket = new WebSocket("wss://kubernetes.docker.internal:6443/api/v1/namespaces/default/pods/cedana-5b5956fb59-l6r8n/attach?stdin=true&stdout=true&tty=true&sfs=wefw&i=true", {
+
+    })
     const attachAddon = new AttachAddon(socket);
     const fitAddon = new FitAddon();
     term.loadAddon(fitAddon);

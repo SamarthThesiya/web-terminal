@@ -15,9 +15,6 @@ spec:
       containers:
       - name: cedana
         image: ghcr.io/cedana/cedana:latest
-        securityContext:
-          privileged: true
-        stdinOnce: false
         stdin: true
         tty: true
         command:

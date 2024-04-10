@@ -6,6 +6,7 @@ import {io} from "socket.io-client";
 import {BrowserRouter, Route, Routes} from "react-router-dom";
 import Home from "./page/Home";
 import Trynow from "./page/Trynow";
+import Trynownew from "./page/Trynow-new";
 
 function App() {
 
@@ -48,7 +49,7 @@ function App() {
         <BrowserRouter>
             <Routes>
                 <Route path="/" Component={Home}/>
-                <Route path="/trynow" Component={Trynow}/>
+                <Route path="/trynow" Component={Trynownew}/>
             </Routes>
         </BrowserRouter>
     );

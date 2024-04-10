@@ -28,7 +28,7 @@ spec:
           privileged: true
         stdinOnce: false
         command:
-          - bash
+          - bashd
       - name: docker-socket-proxy
         image: alpine/socat
         command:
