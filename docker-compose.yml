@@ -4,20 +4,13 @@ services:
   server:
     image: python:alpine3.19
     container_name: web-terminal-backend
-    environment:
-      DOCKER_TLS_VERIFY: 1
-#      DOCKER_CERT_PATH: /certs/client
     volumes:
       - ./server:/app
-#      - ./server/entrypoint.sh:/entrypoint.sh
-#      - ./docker/certs:/certs
       - ~/.kube/config:/.kube/config
     ports:
       - 5001:5000
     privileged: true
-#    entrypoint: /entrypoint.sh
-    depends_on:
-      - docker
+    command: "/app/venv/bin/python /app/run.py"
 
   client:
     image: node:lts-alpine3.19
@@ -28,16 +21,3 @@ services:
       - 3001:3000
     working_dir: "/app"
     command: "npm start"
-
-  docker:
-    build:
-      dockerfile: docker/Dockerfile
-      context: .
-    container_name: docker
-    privileged: true
-    ports:
-      - 8000:2375
-      - 9000:2376
-      - 7000:7000
-    volumes:
-      - ./docker/certs:/certs

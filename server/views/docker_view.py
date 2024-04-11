@@ -28,28 +28,7 @@ class Docker(Resource):
 
     @staticmethod
     def post():
-        # tls_config = docker.tls.TLSConfig(
-        #     client_cert=('/certs/client/cert.pem', '/certs/client/key.pem'),
-        #     ca_cert='/certs/client/ca.pem',
-        #     verify=True
-        # )
-        # client = docker.DockerClient(base_url="tcp://docker:2376", tls=tls_config)
-        # container = client.containers.run(
-        #     "ghcr.io/cedana/cedana:latest",
-        #     # "ubuntu",
-        #     entrypoint="timeout",
-        #     command="-s SIGKILL 120 /bin/bash",
-        #     tty=True,
-        #     auto_remove=True,
-        #     detach=True,
-        #     stderr=True,
-        #     stdin_open=True,
-        #     stdout=False
-        # )
 
-        # Example using the Kubernetes Python client
-        # from kubernetes import client, config
-        #
         config.load_kube_config(config_file="/.kube/config")  # Load config from .kube/config
         v1 = client.CoreV1Api()
 
@@ -104,17 +83,8 @@ mapping = {}
 def handle_init(sid, data, sio):
     config.load_kube_config(config_file="/.kube/config")
     v1 = client.CoreV1Api()
-    exec_command = ['/bin/sh']
 
     global mapping
-
-    # resp = stream(v1.connect_get_namespaced_pod_exec,
-    #               data,
-    #               'default',
-    #               command=exec_command,
-    #               stderr=True, stdin=True,
-    #               stdout=True, tty=True,
-    #               _preload_content=True)
 
     start_time = time.time()
     while time.time() - start_time <= 10000:

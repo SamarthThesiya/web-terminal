@@ -1,7 +1,5 @@
-import logging
-
 import socketio
-from flask import Blueprint, Flask, request
+from flask import Blueprint, Flask
 from flask_restful import Api, Resource
 from flask_cors import CORS
 

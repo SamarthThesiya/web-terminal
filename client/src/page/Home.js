@@ -17,7 +17,6 @@ function Home() {
             url: BASE_URL + "/docker",
             method: "GET",
         }).then((res) => {
-            console.log(res);
             setCurrentCounts(res.data.current_count);
             setMaxCounts(res.data.max_count);
         }).catch((err) => {
@@ -31,7 +30,6 @@ function Home() {
             url: BASE_URL + "/docker",
             method: "POST",
         }).then((res) => {
-            console.log(res);
             navigate("/trynow?id=" + res.data.id);
         }).catch((err) => {
             console.log(err);
