@@ -4,6 +4,7 @@ metadata:
   name: pod-cleanup
 spec:
   schedule: "* * * * *"
+  successfulJobsHistoryLimit: 0
   jobTemplate:
     spec:
       template:
@@ -16,5 +17,5 @@ spec:
             - /bin/bash
             - -c
             - |
-              kubectl get pod -o json | jq -r --argjson timestamp 60 '.items[] | select (.metadata.creationTimestamp | fromdate < now - $timestamp).metadata.name' | xargs -r -L1 kubectl delete pod
+              kubectl get pod -o json | jq -r --argjson timestamp 60 '.items[] | select ((.metadata.creationTimestamp | fromdate < now - $timestamp) and (.metadata.name | contains("cedana-pod"))).metadata.name' | xargs -r -L1 kubectl delete pod
           restartPolicy: OnFailure

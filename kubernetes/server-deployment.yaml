@@ -22,9 +22,12 @@ spec:
 #          value: "1"
 #        - name: DOCKER_CERT_PATH
 #          value: "/certs/client"
+#        tty: true
+#        stdin: true
 #        volumeMounts:
-#        - name: app-code
-#          mountPath: /app
+#        - name: kubectl-config
+#          mountPath: /.kube/config
+#          subPath: config
 #        - name: entrypoint-script
 #          mountPath: /entrypoint.sh
 #          subPath: entrypoint.sh
@@ -36,9 +39,10 @@ spec:
 #          privileged: true
 #        command: ["/entrypoint.sh"]
 #      volumes:
-#      - name: app-code
+#      - name: kubectl-config
 #        hostPath:
-#          path: ./../server
+#          path: /home/samarth/.kube/config
+#          type: File
 #      - name: entrypoint-script
 #        hostPath:
 #          path: ./../server/entrypoint.sh

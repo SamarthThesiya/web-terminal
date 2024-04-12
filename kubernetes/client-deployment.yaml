@@ -16,14 +16,5 @@ spec:
       - name: client
         image: web-terminal-frontend:latest
         imagePullPolicy: Never
-#        volumeMounts:
-#        - name: app-code
-#          mountPath: /app
-#        workingDir: /app
-#        command: ["npm", "start"]
         ports:
         - containerPort: 3000
-#      volumes:
-#      - name: app-code
-#        hostPath:
-#          path: /mnt/c/Data/Projects/web-terminal/client
